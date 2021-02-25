@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>If You Are Watching This You Are Dying</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.2.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.sound.min.js"></script>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+
+
+    <script>
+        let video;
+        let poseNet;
+        let poses = [];
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+            colorMode(HSB);
+            blendMode(LIGHTEST);
+            background(0, 0, 0, 0.9);
+            video = createCapture(VIDEO);
+            video.size(width, height);
+            poseNet = ml5.poseNet(video, modelReady);
+            poseNet.on('pose', function(results) {
+                poses = results;
+            });
+            video.hide();
+        }
+
+
+        function modelReady() {
+            select('#status').html('Model Loaded');
+        }
+
+        function draw() {
+            //SHOWING THE IMAGR FUNCTION IS A NEAT EFFECT
+            //            image(video, 0, 0, width, height);
+            drawFace();
+            drawSkeleton();
+        }
+
+
+        function drawFace() {
+            for (let i = 0; i < poses.length; i++) {
+                let pose = poses[i].pose;
+                for (let j = 0; j < pose.keypoints.length; j++) {
+                    let keypoint = pose.keypoints[j];
+
+                    if (keypoint.score > 0.2 && keypoint.position.x < 300) {
+                        fill(0, 255, 0, 0.5);
+                        ellipse(keypoint.position.x, keypoint.position.y, 1, 1);
+                        line(keypoint.position.x, keypoint.position.y, width / 2, height / 2)
+
+
+                    } else if (keypoint.score > 0.2 && keypoint.position.x < 600) {
+
+                        fill(0, 255, 0, 0.5);
+                        ellipse(keypoint.position.x, keypoint.position.y, 1, 1);
+                        line(keypoint.position.x, keypoint.position.y, width / 2, height / 2)
+
+                    } else {
+                        fill(0, 0, 255, 0.5);
+                        ellipse(keypoint.position.x, keypoint.position.y, 1, 1);
+                        line(keypoint.position.x, keypoint.position.y, width / 2, height / 2)
+                    }
+                }
+            }
+        }
+
+        function drawSkeleton() {
+            let rainbow = random(1, 360);
+            for (let i = 0; i < poses.length; i++) {
+                let skeleton = poses[i].skeleton;
+                for (let j = 0; j < skeleton.length; j++) {
+                    let partA = skeleton[j][0];
+                    let partB = skeleton[j][1];
+                    stroke(rainbow, 100, 100, 0.3);
+                    line(partA.position.x, partA.position.y, width / 2, height / 2);
+
+                }
+            }
+        }
+
+    </script>
+</head>
+
+</html>
+
+<!--PLEASE LOOK AT README FILE ON GITHUB FOR SOURCING -->
